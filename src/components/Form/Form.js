@@ -1,4 +1,7 @@
 import React from 'react';
+import { connect } from "react-redux";
+import {hideNotification, showNotification} from '../../redux/action'
+
 
 export class Form extends React.Component {
     state = {
@@ -6,8 +9,7 @@ export class Form extends React.Component {
         email: '',
         number: '',
         city: '',
-        list: [],
-        searchTerm: '',
+        isVisile: false,
     }
 
     onNameChange = (event) => {
@@ -23,31 +25,23 @@ export class Form extends React.Component {
         this.setState({ city: event.target.value})
     }
 
-    onSearchChange = (event) => {
-        console.log(this.state.searchTerm)
-        this.setState({ searchTerm: event.target.value})
-        const list = [...this.state.list];
-
-        if(this.state.searchTerm !== '' ){
-            const results = list.filter(person =>
-                person.includes(this.state.searchTerm)
-              );
-    
-              this.setState({ list: results})
-        }else {
-            this.setState({
-                list: [...this.state.list      ] })
-        }
-            
-        
-    }
-
     handleSubmit = (event) => {
         // Prevent page reload
         event.preventDefault();
-        this.setState({
-            list: [...this.state.list,this.state.name, this.state.email,this.state.number,this.state.city]
-        })
+        const allList = {...this.state};
+        console.log('getstat',allList );
+        const { onShowNotification, onHideNotification  } = this.props;
+        this.setState({ isVisible: true});
+        // generate a unique id for the notification
+        const id = new Date().getTime(); 
+        const message = allList;
+        const notification = { id, message };
+        console.log('notification', notification)
+        onShowNotification(notification)
+        setTimeout(() => {
+            this.setState({ isVisible: false });
+            onHideNotification(notification)
+        }, 3000)
         this.setState({
             name: '',
             email: '',
@@ -55,6 +49,24 @@ export class Form extends React.Component {
             city: ''
         })
       };
+
+      renderMessage() {
+        const { notificaionsMessage } = this.props;
+
+        return (
+            <div className="notification">
+            {notificaionsMessage.map(notification => (
+                <div key={notification.id}>
+                {notification.message.name}
+                {notification.message.email}
+                {notification.message.number}
+                {notification.message.city}
+                </div>
+            ))}
+            </div>
+        )
+       
+    }
 
       renderForm() {
         return (
@@ -69,35 +81,44 @@ export class Form extends React.Component {
              <label>City </label>
              <input type="text"  required  value={ this.state.city} onChange={ this.onCityChange}/>
              <input type="submit" />
-             </form>
-                    
+             </form>                    
             </div>
             )
       }
 
     render () {
-        console.log('search', this.state.list)
         return (
-            <div>
+            <div className='Form'>
                 { this.renderForm() }
-                <br />
-                <input
-                type="text"
-                placeholder="Search"
-                value={ this.state.searchTerm}
-                onChange={ this.onSearchChange}
-                />
-                <h3>Data</h3>
-                { this.state.list.map((value, index) => 
-                <div key={index}>
-                <li>{value}</li>
-                </div>)}
+                { this.state.isVisible && this.renderMessage() }
             </div>
         )
     }
 }
 
-export default Form;
+
+const mapStateToProps = (state) => {
+    return {
+        notificaionsMessage: state.notifications
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+    onHideNotification: (notification) => {
+        dispatch(hideNotification(notification));
+    },
+    onShowNotification: (notification) => {
+        dispatch(showNotification(notification))
+    }
+    }
+}
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(Form);
+
 
 
 

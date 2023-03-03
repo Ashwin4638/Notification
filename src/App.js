@@ -1,22 +1,28 @@
-import Parent from "./components/Counter/Parent"
-import Form from "./components/Form/Form"
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Component1 from "./pages/Component1";
+import Component2 from "./pages/Component2";
+import Component3 from "./pages/Component3";
+import Header from "./components/Header/Header";
+import Footer from "./components/Footer/Footer";
+import { Provider } from 'react-redux';
+import store from './redux/store';
 
 export default function App() {
-    return (
-        <div className="App">
-        <BrowserRouter>
-        <Link to="/">HOME</Link>
-        <br/>
-        <Link to="/form">GO To FORM PAGE</Link>
-        <br/>
+  return (
+    <Provider store={store}>
+    <Router>
+      <div className="App">
+        <Header />
         <Routes>
-          <Route path="/"  element={ <Parent/>}/>
+          <Route path="/" exact element={<Component1 />} />
+          <Route path="/component2" element={<Component2 />} />
+          <Route path="/component3" element={<Component3 />} />
         </Routes>
-        <Routes>
-          <Route path="/form"  element={ <Form/>}/>
-        </Routes>
-      </BrowserRouter>
-        </div>
-    )
+      </div>
+      <Footer />
+    </Router>
+    </Provider>
+  );
 }
+
